@@ -18,7 +18,7 @@ import java.util.Map;
 
 @Repository
 public class CacheableDao {
-  public static final String FMT_NULL_OR_MULTIPLE_RESULT = "Null or multiple result by {0} in {1}.";
+  public static final String FMT_RESULT_NOT_EQUALS_ONE = "Result not equals one : {0} = {1}.";
 
   @Autowired
   private JdbcTemplate jdbcTemplate;
@@ -123,32 +123,32 @@ public class CacheableDao {
     });
   }
 
-  public <T extends CacheableEntity> T oneWithoutCache(@NonNull Class<T> cacheType, @NonNull T t, boolean rtnNullIfNullOrMultiple) {
+  private <T extends CacheableEntity> T oneWithoutCache(@NonNull Class<T> cacheType, @NonNull T t, boolean rtnNullIfNotEqualsOne) {
     List<T> lst = this.lst(cacheType, t);
     if (lst.size() == 1) {
       return lst.get(0);
     } else {
-      if (rtnNullIfNullOrMultiple) {
+      if (rtnNullIfNotEqualsOne) {
         return null;
       } else {
-        throw new SqlException(MessageFormat.format(FMT_NULL_OR_MULTIPLE_RESULT, OM3.writeValueAsString(t), cacheType.getName()));
+        throw new SqlException(MessageFormat.format(FMT_RESULT_NOT_EQUALS_ONE, cacheType.getName(), OM3.writeValueAsString(t)));
       }
     }
   }
 
-  public <T extends CacheableEntity> T one(@NonNull Class<T> cacheType, @NonNull T t, boolean rtnNullIfNullOrMultiple) {
-    return oneWithoutCache(cacheType, t, rtnNullIfNullOrMultiple);
+  public <T extends CacheableEntity> T one(@NonNull Class<T> cacheType, @NonNull T t, boolean rtnNullIfNotEqualsOne) {
+    return oneWithoutCache(cacheType, t, rtnNullIfNotEqualsOne);
   }
 
   public <T extends CacheableEntity> T one(@NonNull Class<T> cacheType, @NonNull T t) {
     return oneWithoutCache(cacheType, t, false);
   }
 
-  public <T extends CacheableEntity> T oneById(@NonNull Class<T> cacheType, @NonNull String id, boolean rtnNullIfNullOrMultiple) {
+  public <T extends CacheableEntity> T oneById(@NonNull Class<T> cacheType, @NonNull String id, boolean rtnNullIfNotEqualsOne) {
     try {
       T t = cacheType.newInstance();
       t.setId(id);
-      return oneWithoutCache(cacheType, t, rtnNullIfNullOrMultiple);
+      return oneWithoutCache(cacheType, t, rtnNullIfNotEqualsOne);
     } catch (Exception e) {
       throw new SqlException(e);
     }
