@@ -28,9 +28,9 @@ public class CacheableDao {
     return jdbcTemplate.update(Tuple.getFirst(pair), Tuple.getSecond(pair).toArray());
   }
 
-  public <T extends CacheableEntity> int cnt(@NonNull Class<T> cacheType, @NonNull T t) {
+  public <T extends CacheableEntity> long cnt(@NonNull Class<T> cacheType, @NonNull T t) {
     Tuple.Pair<String, List<Object>> pair = t.selectCountSql();
-    return jdbcTemplate.update(Tuple.getFirst(pair), Tuple.getSecond(pair).toArray());
+    return (long) jdbcTemplate.queryForMap(Tuple.getFirst(pair), Tuple.getSecond(pair).toArray()).get("count(1)");
   }
 
   public <T extends CacheableEntity> int del(@NonNull Class<T> cacheType, @NonNull T t) {
