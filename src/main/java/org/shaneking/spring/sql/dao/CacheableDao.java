@@ -28,9 +28,9 @@ public class CacheableDao {
     return jdbcTemplate.update(Tuple.getFirst(pair), Tuple.getSecond(pair).toArray());
   }
 
-  public <T extends CacheableEntity> long cnt(@NonNull Class<T> cacheType, @NonNull T t) {
+  public <T extends CacheableEntity> int cnt(@NonNull Class<T> cacheType, @NonNull T t) {
     Tuple.Pair<String, List<Object>> pair = t.selectCountSql();
-    return (long) jdbcTemplate.queryForMap(Tuple.getFirst(pair), Tuple.getSecond(pair).toArray()).get("count(1)");
+    return (int) jdbcTemplate.queryForMap(Tuple.getFirst(pair), Tuple.getSecond(pair).toArray()).get("count(1)");
   }
 
   public <T extends CacheableEntity> int del(@NonNull Class<T> cacheType, @NonNull T t) {
@@ -80,34 +80,14 @@ public class CacheableDao {
     }
   }
 
-  private <T extends CacheableEntity> int modByIdWithoutCache(@NonNull Class<T> cacheType, @NonNull T t) {
+  public <T extends CacheableEntity> int modById(@NonNull Class<T> cacheType, @NonNull T t) {
     Tuple.Pair<String, List<Object>> pair = t.updateByIdSql();
     return jdbcTemplate.update(Tuple.getFirst(pair), Tuple.getSecond(pair).toArray());
   }
 
-  public <T extends CacheableEntity> int modById(@NonNull Class<T> cacheType, @NonNull String id) {
-    try {
-      T t = cacheType.newInstance();
-      t.setId(id);
-      return modByIdWithoutCache(cacheType, t);
-    } catch (Exception e) {
-      throw new SqlException(e);
-    }
-  }
-
-  private <T extends CacheableEntity> int modByIdAndVersionWithoutCache(@NonNull Class<T> cacheType, @NonNull T t) {
+  public <T extends CacheableEntity> int modByIdAndVersion(@NonNull Class<T> cacheType, @NonNull T t) {
     Tuple.Pair<String, List<Object>> pair = t.updateByIdAndVersionSql();
     return jdbcTemplate.update(Tuple.getFirst(pair), Tuple.getSecond(pair).toArray());
-  }
-
-  public <T extends CacheableEntity> int modByIdAndVersion(@NonNull Class<T> cacheType, @NonNull String id, @NonNull Integer version) {
-    try {
-      T t = cacheType.newInstance();
-      t.setVersion(version).setId(id);
-      return modByIdAndVersionWithoutCache(cacheType, t);
-    } catch (Exception e) {
-      throw new SqlException(e);
-    }
   }
 
   public <T extends CacheableEntity> List<T> lst(@NonNull Class<T> cacheType, @NonNull T t) {
