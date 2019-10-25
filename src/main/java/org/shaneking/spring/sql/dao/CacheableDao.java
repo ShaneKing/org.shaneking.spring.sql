@@ -1,7 +1,9 @@
 package org.shaneking.spring.sql.dao;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import lombok.NonNull;
+import org.shaneking.skava.sk.annotation.BeCareful;
 import org.shaneking.skava.sk.collect.Tuple;
 import org.shaneking.skava.t3.jackson.OM3;
 import org.shaneking.spring.sql.entity.CacheableEntity;
@@ -33,21 +35,30 @@ public class CacheableDao {
     return (int) jdbcTemplate.queryForMap(Tuple.getFirst(pair), Tuple.getSecond(pair).toArray()).get("count(1)");
   }
 
+  @BeCareful
   public <T extends CacheableEntity> int del(@NonNull Class<T> cacheType, @NonNull T t) {
     Tuple.Pair<String, List<Object>> pair = t.deleteSql();
     return jdbcTemplate.update(Tuple.getFirst(pair), Tuple.getSecond(pair).toArray());
   }
 
   private <T extends CacheableEntity> int delByIdWithoutCache(@NonNull Class<T> cacheType, @NonNull T t) {
-    Tuple.Pair<String, List<Object>> pair = t.deleteByIdSql();
-    return jdbcTemplate.update(Tuple.getFirst(pair), Tuple.getSecond(pair).toArray());
+    if (Strings.isNullOrEmpty(t.getId()) && (t.getWhereOCs() == null || t.getWhereOCs().get("id") == null)) {
+      return 0;
+    } else {
+      Tuple.Pair<String, List<Object>> pair = t.deleteByIdSql();
+      return jdbcTemplate.update(Tuple.getFirst(pair), Tuple.getSecond(pair).toArray());
+    }
   }
 
   public <T extends CacheableEntity> int delById(@NonNull Class<T> cacheType, @NonNull String id) {
     try {
-      T t = cacheType.newInstance();
-      t.setId(id);
-      return delByIdWithoutCache(cacheType, t);
+      if (Strings.isNullOrEmpty(id)) {
+        return 0;
+      } else {
+        T t = cacheType.newInstance();
+        t.setId(id);
+        return delByIdWithoutCache(cacheType, t);
+      }
     } catch (Exception e) {
       throw new SqlException(e);
     }
@@ -55,25 +66,33 @@ public class CacheableDao {
 
   public <T extends CacheableEntity> int delByIds(@NonNull Class<T> cacheType, @NonNull List<String> ids) {
     try {
-      T t = cacheType.newInstance();
-      Map<String, OperationContent> map = Maps.newHashMap();
-      map.put("id", new OperationContent().setOp(Keyword0.IN).setCl(ids));
-      t.setWhereOCs(map);
-      return delByIdWithoutCache(cacheType, t);
+      if (ids.size() == 0) {
+        return 0;
+      } else {
+        T t = cacheType.newInstance();
+        Map<String, OperationContent> map = Maps.newHashMap();
+        map.put("id", new OperationContent().setOp(Keyword0.IN).setCl(ids));
+        t.setWhereOCs(map);
+        return delByIdWithoutCache(cacheType, t);
+      }
     } catch (Exception e) {
       throw new SqlException(e);
     }
   }
 
   private <T extends CacheableEntity> int delByIdAndVersionWithoutCache(@NonNull Class<T> cacheType, @NonNull T t) {
-    Tuple.Pair<String, List<Object>> pair = t.deleteByIdAndVersionSql();
-    return jdbcTemplate.update(Tuple.getFirst(pair), Tuple.getSecond(pair).toArray());
+    if (Strings.isNullOrEmpty(t.getId())) {
+      return 0;
+    } else {
+      Tuple.Pair<String, List<Object>> pair = t.deleteByIdAndVersionSql();
+      return jdbcTemplate.update(Tuple.getFirst(pair), Tuple.getSecond(pair).toArray());
+    }
   }
 
   public <T extends CacheableEntity> int delByIdAndVersion(@NonNull Class<T> cacheType, @NonNull String id, @NonNull Integer version) {
     try {
       T t = cacheType.newInstance();
-      t.setVersion(version).setId(id);
+      t.setVer(version).setId(id);
       return delByIdAndVersionWithoutCache(cacheType, t);
     } catch (Exception e) {
       throw new SqlException(e);
@@ -81,13 +100,21 @@ public class CacheableDao {
   }
 
   public <T extends CacheableEntity> int modById(@NonNull Class<T> cacheType, @NonNull T t) {
-    Tuple.Pair<String, List<Object>> pair = t.updateByIdSql();
-    return jdbcTemplate.update(Tuple.getFirst(pair), Tuple.getSecond(pair).toArray());
+    if (Strings.isNullOrEmpty(t.getId())) {
+      return 0;
+    } else {
+      Tuple.Pair<String, List<Object>> pair = t.updateByIdSql();
+      return jdbcTemplate.update(Tuple.getFirst(pair), Tuple.getSecond(pair).toArray());
+    }
   }
 
   public <T extends CacheableEntity> int modByIdAndVersion(@NonNull Class<T> cacheType, @NonNull T t) {
-    Tuple.Pair<String, List<Object>> pair = t.updateByIdAndVersionSql();
-    return jdbcTemplate.update(Tuple.getFirst(pair), Tuple.getSecond(pair).toArray());
+    if (Strings.isNullOrEmpty(t.getId())) {
+      return 0;
+    } else {
+      Tuple.Pair<String, List<Object>> pair = t.updateByIdAndVersionSql();
+      return jdbcTemplate.update(Tuple.getFirst(pair), Tuple.getSecond(pair).toArray());
+    }
   }
 
   public <T extends CacheableEntity> List<T> lst(@NonNull Class<T> cacheType, @NonNull T t) {
