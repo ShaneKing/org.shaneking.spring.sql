@@ -8,6 +8,6 @@ import org.shaneking.sql.entity.SKIdAdtVerEntity;
 import java.util.Map;
 
 @Accessors(chain = true)
-@ToString(callSuper = true)
+@ToString
 public class CacheableEntity extends SKIdAdtVerEntity<Map<String, OperationContent>> {
 }
