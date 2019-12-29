@@ -116,6 +116,10 @@
     </dependency>
     <dependency>
       <groupId>org.shaneking</groupId>
+      <artifactId>org.shaneking.jackson</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.shaneking</groupId>
       <artifactId>org.shaneking.skava</artifactId>
     </dependency>
     <dependency>
