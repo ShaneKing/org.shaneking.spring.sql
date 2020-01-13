@@ -1,25 +1,22 @@
 package org.shaneking.spring.sql.dao;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.Maps;
 import lombok.Getter;
 import lombok.NonNull;
 import org.shaneking.jackson.databind.OM3;
-import org.shaneking.skava.annotation.BeCareful;
 import org.shaneking.skava.persistence.Tuple;
 import org.shaneking.spring.sql.annotation.SKCacheEvict;
 import org.shaneking.spring.sql.annotation.SKCacheable;
 import org.shaneking.spring.sql.entity.CacheableEntity;
 import org.shaneking.spring.sql.exception.SqlException;
 import org.shaneking.sql.Keyword0;
-import org.shaneking.sql.OperationContent;
+import org.shaneking.sql.entity.SKIdEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.text.MessageFormat;
 import java.util.List;
-import java.util.Map;
 
 @Repository
 public class CacheableDao {
@@ -36,38 +33,21 @@ public class CacheableDao {
 
   public <T extends CacheableEntity> int cnt(@NonNull Class<T> cacheType, @NonNull T t) {
     Tuple.Pair<String, List<Object>> pair = t.selectCountSql();
-    return (int) jdbcTemplate.queryForMap(Tuple.getFirst(pair), Tuple.getSecond(pair).toArray()).get("count(1)");
-  }
-
-  @BeCareful
-  @SKCacheEvict
-  public <T extends CacheableEntity> int del(@NonNull Class<T> cacheType, @NonNull T t) {
-    Tuple.Pair<String, List<Object>> pair = t.deleteSql();
-    if (Tuple.getSecond(pair) == null || Tuple.getSecond(pair).size() < 1) {
-      return 0;//please use truncate
-    } else {
-      return jdbcTemplate.update(Tuple.getFirst(pair), Tuple.getSecond(pair).toArray());
-    }
-  }
-
-  private <T extends CacheableEntity> int delByIdWithoutCache(@NonNull Class<T> cacheType, @NonNull T t) {
-    Tuple.Pair<String, List<Object>> pair = t.deleteByIdSql();
-    if (Tuple.getSecond(pair) == null || Tuple.getSecond(pair).size() < 1) {
-      return 0;
-    } else {
-      return jdbcTemplate.update(Tuple.getFirst(pair), Tuple.getSecond(pair).toArray());
-    }
+    return (int) jdbcTemplate.queryForMap(Tuple.getFirst(pair), Tuple.getSecond(pair).toArray()).get(Keyword0.COUNT_1_);
   }
 
   @SKCacheEvict
-  public <T extends CacheableEntity> int delById(@NonNull Class<T> cacheType, @NonNull String id) {
+  public <T extends CacheableEntity> int delById(@NonNull Class<T> cacheType, T t, @NonNull String id) {
     try {
       if (Strings.isNullOrEmpty(id)) {
-        return 0;
+        throw new SqlException();
       } else {
-        T t = cacheType.newInstance();
-        t.setId(id);
-        return delByIdWithoutCache(cacheType, t);
+        if (t == null) {
+          t = cacheType.newInstance();
+        }
+        t.forceOc(t.getWhereOCs(), SKIdEntity.FIELD__ID).forceSomeId(id);
+        Tuple.Pair<String, List<Object>> pair = t.deleteSql();
+        return jdbcTemplate.update(Tuple.getFirst(pair), Tuple.getSecond(pair).toArray());
       }
     } catch (Exception e) {
       throw new SqlException(e);
@@ -75,58 +55,41 @@ public class CacheableDao {
   }
 
   @SKCacheEvict
-  public <T extends CacheableEntity> int delByIds(@NonNull Class<T> cacheType, @NonNull List<String> ids) {
+  public <T extends CacheableEntity> int delByIds(@NonNull Class<T> cacheType, T t, @NonNull List<String> ids) {
     try {
       if (ids.size() == 0) {
         return 0;
       } else {
-        T t = cacheType.newInstance();
-        Map<String, OperationContent> map = Maps.newHashMap();
-        map.put("id", new OperationContent().setOp(Keyword0.IN).setCl(ids));
-        t.setWhereOCs(map);
-        return delByIdWithoutCache(cacheType, t);
+        if (t == null) {
+          t = cacheType.newInstance();
+        }
+        t.forceOc(t.getWhereOCs(), SKIdEntity.FIELD__ID).forceSomeIds(ids);
+        Tuple.Pair<String, List<Object>> pair = t.deleteSql();
+        return jdbcTemplate.update(Tuple.getFirst(pair), Tuple.getSecond(pair).toArray());
       }
     } catch (Exception e) {
       throw new SqlException(e);
     }
   }
 
-  private <T extends CacheableEntity> int delByIdAndVersionWithoutCache(@NonNull Class<T> cacheType, @NonNull T t) {
-    if (Strings.isNullOrEmpty(t.getId())) {
-      return 0;
+  @SKCacheEvict
+  public <T extends CacheableEntity> int modById(@NonNull Class<T> cacheType, @NonNull T t, @NonNull String id) {
+    if (Strings.isNullOrEmpty(id)) {
+      throw new SqlException();
     } else {
-      Tuple.Pair<String, List<Object>> pair = t.deleteByIdAndVersionSql();
+      t.forceOc(t.getWhereOCs(), SKIdEntity.FIELD__ID).forceSomeId(id);
+      Tuple.Pair<String, List<Object>> pair = t.updateSql();
       return jdbcTemplate.update(Tuple.getFirst(pair), Tuple.getSecond(pair).toArray());
     }
   }
 
   @SKCacheEvict
-  public <T extends CacheableEntity> int delByIdAndVersion(@NonNull Class<T> cacheType, @NonNull String id, @NonNull Integer version) {
-    try {
-      T t = cacheType.newInstance();
-      t.setVer(version).setId(id);
-      return delByIdAndVersionWithoutCache(cacheType, t);
-    } catch (Exception e) {
-      throw new SqlException(e);
-    }
-  }
-
-  @SKCacheEvict
-  public <T extends CacheableEntity> int modById(@NonNull Class<T> cacheType, @NonNull T t) {
-    if (Strings.isNullOrEmpty(t.getId())) {
-      return 0;
+  public <T extends CacheableEntity> int modByIds(@NonNull Class<T> cacheType, @NonNull T t, @NonNull List<String> ids) {
+    if (ids.size() == 0) {
+      throw new SqlException();
     } else {
-      Tuple.Pair<String, List<Object>> pair = t.updateByIdSql();
-      return jdbcTemplate.update(Tuple.getFirst(pair), Tuple.getSecond(pair).toArray());
-    }
-  }
-
-  @SKCacheEvict
-  public <T extends CacheableEntity> int modByIdAndVersion(@NonNull Class<T> cacheType, @NonNull T t) {
-    if (Strings.isNullOrEmpty(t.getId())) {
-      return 0;
-    } else {
-      Tuple.Pair<String, List<Object>> pair = t.updateByIdAndVersionSql();
+      t.forceOc(t.getWhereOCs(), SKIdEntity.FIELD__ID).forceSomeIds(ids);
+      Tuple.Pair<String, List<Object>> pair = t.updateSql();
       return jdbcTemplate.update(Tuple.getFirst(pair), Tuple.getSecond(pair).toArray());
     }
   }
@@ -146,6 +109,16 @@ public class CacheableDao {
     });
   }
 
+  @SKCacheable
+  public <T extends CacheableEntity> T one(@NonNull Class<T> cacheType, @NonNull T t, boolean rtnNullIfNotEqualsOne) {
+    return oneWithoutCache(cacheType, t, rtnNullIfNotEqualsOne);
+  }
+
+  @SKCacheable
+  public <T extends CacheableEntity> T one(@NonNull Class<T> cacheType, @NonNull T t) {
+    return oneWithoutCache(cacheType, t, false);
+  }
+
   private <T extends CacheableEntity> T oneWithoutCache(@NonNull Class<T> cacheType, @NonNull T t, boolean rtnNullIfNotEqualsOne) {
     List<T> lst = this.lst(cacheType, t);
     if (lst.size() == 1) {
@@ -160,29 +133,25 @@ public class CacheableDao {
   }
 
   @SKCacheable
-  public <T extends CacheableEntity> T one(@NonNull Class<T> cacheType, @NonNull T t, boolean rtnNullIfNotEqualsOne) {
-    return oneWithoutCache(cacheType, t, rtnNullIfNotEqualsOne);
+  public <T extends CacheableEntity> T oneById(@NonNull Class<T> cacheType, T t, @NonNull String id, boolean rtnNullIfNotEqualsOne) {
+    return oneByIdWithoutCache(cacheType, t, id, rtnNullIfNotEqualsOne);
   }
 
   @SKCacheable
-  public <T extends CacheableEntity> T one(@NonNull Class<T> cacheType, @NonNull T t) {
-    return oneWithoutCache(cacheType, t, false);
+  public <T extends CacheableEntity> T oneById(@NonNull Class<T> cacheType, T t, @NonNull String id) {
+    return oneByIdWithoutCache(cacheType, t, id, false);
   }
 
-  @SKCacheable
-  public <T extends CacheableEntity> T oneById(@NonNull Class<T> cacheType, @NonNull String id, boolean rtnNullIfNotEqualsOne) {
+  private <T extends CacheableEntity> T oneByIdWithoutCache(@NonNull Class<T> cacheType, T t, @NonNull String id, boolean rtnNullIfNotEqualsOne) {
     try {
-      T t = cacheType.newInstance();
+      if (t == null) {
+        t = cacheType.newInstance();
+      }
       t.setId(id);
       return oneWithoutCache(cacheType, t, rtnNullIfNotEqualsOne);
     } catch (Exception e) {
       throw new SqlException(e);
     }
-  }
-
-  @SKCacheable
-  public <T extends CacheableEntity> T oneById(@NonNull Class<T> cacheType, @NonNull String id) {
-    return oneById(cacheType, id, false);
   }
 
 }
