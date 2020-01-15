@@ -17,12 +17,22 @@ import java.util.stream.Collectors;
 public class CacheableEntity extends SKIdAdtVerEntity<Map<String, OperationContent>> {
   @Override
   public List<OperationContent> findHavingOCs(@NonNull String fieldName) {
-    return this.getHavingOCs().keySet().parallelStream().filter(s -> s.equals(fieldName) || s.startsWith(fieldName + String20.UNDERLINE_UNDERLINE)).map(s -> this.getHavingOCs().get(s)).collect(Collectors.toList());
+    Map<String, OperationContent> ocMap = this.getHavingOCs();
+    if (ocMap == null) {
+      ocMap = Maps.newHashMap();
+      this.setHavingOCs(ocMap);
+    }
+    return ocMap.keySet().parallelStream().filter(s -> s != null).filter(s -> s.equals(fieldName) || s.startsWith(fieldName + String20.UNDERLINE_UNDERLINE)).map(s -> this.getHavingOCs().get(s)).collect(Collectors.toList());
   }
 
   @Override
   public List<OperationContent> findWhereOCs(@NonNull String fieldName) {
-    return this.getWhereOCs().keySet().parallelStream().filter(s -> s.equals(fieldName) || s.startsWith(fieldName + String20.UNDERLINE_UNDERLINE)).map(s -> this.getWhereOCs().get(s)).collect(Collectors.toList());
+    Map<String, OperationContent> ocMap = this.getWhereOCs();
+    if (ocMap == null) {
+      ocMap = Maps.newHashMap();
+      this.setWhereOCs(ocMap);
+    }
+    return ocMap.keySet().parallelStream().filter(s -> s != null).filter(s -> s.equals(fieldName) || s.startsWith(fieldName + String20.UNDERLINE_UNDERLINE)).map(s -> this.getWhereOCs().get(s)).collect(Collectors.toList());
   }
 
   public OperationContent forceHavingOc(@NonNull String field) {
