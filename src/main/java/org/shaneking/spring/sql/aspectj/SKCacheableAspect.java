@@ -24,7 +24,6 @@ import java.util.stream.Collectors;
 @Component
 @Slf4j
 public class SKCacheableAspect {
-
   @Autowired
   private SKCacheAbstractWrapper skCacheAbstractWrapper;
 
@@ -94,7 +93,6 @@ public class SKCacheableAspect {
             }
             rtn = pjp.proceed();
           }
-
           if (rtn != null) {
             if (rtn instanceof List) {
               List<Object> rstList = (List<Object>) rtn;
@@ -106,7 +104,6 @@ public class SKCacheableAspect {
                   }
                 }, HashMap::putAll));
               }
-
               if (rtnList != null) {
                 rtnList.addAll(rstList);
               } else {
