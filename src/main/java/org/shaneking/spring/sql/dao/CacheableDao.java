@@ -50,14 +50,14 @@ public class CacheableDao {
   public <T extends CacheableEntity> int delById(@NonNull Class<T> cacheType, @NonNull T t) {
     try {
       if (Strings.isNullOrEmpty(t.getId())) {
-        throw new SqlException();
+        throw new SqlException(OM3.p(cacheType, t));
       } else {
         Tuple.Pair<String, List<Object>> pair = t.deleteSql();
         log.info(OM3.writeValueAsString(pair));
         return this.getJdbcTemplate().update(Tuple.getFirst(pair), Tuple.getSecond(pair).toArray());
       }
     } catch (Exception e) {
-      throw new SqlException(e);
+      throw new SqlException(OM3.p(cacheType, t), e);
     }
   }
 
@@ -65,7 +65,7 @@ public class CacheableDao {
   public <T extends CacheableEntity> int delById(@NonNull Class<T> cacheType, T t, @NonNull String id) {
     try {
       if (Strings.isNullOrEmpty(id)) {
-        throw new SqlException();
+        throw new SqlException(OM3.p(cacheType, id));
       } else {
         if (t == null) {
           t = cacheType.newInstance();
@@ -76,7 +76,7 @@ public class CacheableDao {
         return this.getJdbcTemplate().update(Tuple.getFirst(pair), Tuple.getSecond(pair).toArray());
       }
     } catch (Exception e) {
-      throw new SqlException(e);
+      throw new SqlException(OM3.p(cacheType, id), e);
     }
   }
 
@@ -95,14 +95,14 @@ public class CacheableDao {
         return this.getJdbcTemplate().update(Tuple.getFirst(pair), Tuple.getSecond(pair).toArray());
       }
     } catch (Exception e) {
-      throw new SqlException(e);
+      throw new SqlException(OM3.p(cacheType, t, ids), e);
     }
   }
 
   @SKCacheEvict(pKeyIdx = 2)
   public <T extends CacheableEntity> int modByIdsVer(@NonNull Class<T> cacheType, @NonNull T t, @NonNull List<String> ids) {
     if (ids.size() == 0) {
-      throw new SqlException();
+      throw new SqlException(OM3.p(cacheType, t, ids));
     } else {
       t.forceWhereOc(SKIdEntity.FIELD__ID).resetIds(ids);
       Tuple.Pair<String, List<Object>> pair = t.updateSql();
@@ -114,7 +114,7 @@ public class CacheableDao {
   @SKCacheEvict(pKeyIdx = 1, pKeyPath = SKIdEntity.FIELD__ID)
   public <T extends CacheableEntity> int modByIdVer(@NonNull Class<T> cacheType, @NonNull T t) {
     if (Strings.isNullOrEmpty(t.getId())) {
-      throw new SqlException();
+      throw new SqlException(OM3.p(cacheType, t));
     } else {
       Tuple.Pair<String, List<Object>> pair = t.updateSql();
       log.info(OM3.writeValueAsString(pair));
@@ -135,7 +135,7 @@ public class CacheableDao {
       t.forceWhereOc(SKIdEntity.FIELD__ID).resetIds(ids);
       return lstWithoutCache(cacheType, t);
     } catch (Exception e) {
-      throw new SqlException(e);
+      throw new SqlException(OM3.p(cacheType, ids), e);
     }
   }
 
@@ -149,7 +149,7 @@ public class CacheableDao {
         rst.mapRow(resultSet);
         return rst;
       } catch (Exception e) {
-        throw new SqlException(e);
+        throw new SqlException(OM3.p(cacheType, t), e);
       }
     });
   }
@@ -193,7 +193,7 @@ public class CacheableDao {
       t.setId(id);
       return oneWithoutCache(cacheType, t, rtnNullIfNotEqualsOne);
     } catch (Exception e) {
-      throw new SqlException(e);
+      throw new SqlException(OM3.p(cacheType, id, rtnNullIfNotEqualsOne), e);
     }
   }
 }
