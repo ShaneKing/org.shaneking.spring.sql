@@ -9,7 +9,6 @@ public abstract class SKCacheAbstractWrapper {
   @NonNull
   public abstract List<String> hmget(@NonNull String key, String... fields);
 
-  @NonNull
   public abstract String hget(@NonNull String key, @NonNull String field);
 
   public abstract String hset(@NonNull String key, @NonNull String field, @NonNull String value);
