@@ -14,5 +14,4 @@ public abstract class SKCacheAbstractWrapper {
   public abstract String hset(@NonNull String key, @NonNull String field, @NonNull String value);
 
   public abstract String hmset(@NonNull String key, @NonNull Map<String, String> map);
-
 }
