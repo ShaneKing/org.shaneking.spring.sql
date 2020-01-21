@@ -6,8 +6,8 @@ import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.shaneking.jackson.databind.OM3;
 import org.shaneking.skava.persistence.Tuple;
-import org.shaneking.spring.sql.annotation.SKCacheEvict;
-import org.shaneking.spring.sql.annotation.SKCacheable;
+import org.shaneking.spring.sql.annotation.EntityCacheEvict;
+import org.shaneking.spring.sql.annotation.EntityCacheable;
 import org.shaneking.spring.sql.entity.CacheableEntity;
 import org.shaneking.spring.sql.exception.SqlException;
 import org.shaneking.sql.Keyword0;
@@ -46,7 +46,7 @@ public class CacheableDao {
     return (int) this.getJdbcTemplate().queryForMap(Tuple.getFirst(pair), Tuple.getSecond(pair).toArray()).get(Keyword0.GROUP__CONCAT_ID_);
   }
 
-  @SKCacheEvict(pKeyIdx = 1, pKeyPath = SKIdEntity.FIELD__ID)
+  @EntityCacheEvict(pKeyIdx = 1, pKeyPath = SKIdEntity.FIELD__ID)
   public <T extends CacheableEntity> int delById(@NonNull Class<T> cacheType, @NonNull T t) {
     try {
       if (Strings.isNullOrEmpty(t.getId())) {
@@ -61,7 +61,7 @@ public class CacheableDao {
     }
   }
 
-  @SKCacheEvict(pKeyIdx = 2)
+  @EntityCacheEvict(pKeyIdx = 2)
   public <T extends CacheableEntity> int delById(@NonNull Class<T> cacheType, T t, @NonNull String id) {
     try {
       if (Strings.isNullOrEmpty(id)) {
@@ -80,7 +80,7 @@ public class CacheableDao {
     }
   }
 
-  @SKCacheEvict(pKeyIdx = 2)
+  @EntityCacheEvict(pKeyIdx = 2)
   public <T extends CacheableEntity> int delByIds(@NonNull Class<T> cacheType, T t, @NonNull List<String> ids) {
     try {
       if (ids.size() == 0) {
@@ -99,7 +99,7 @@ public class CacheableDao {
     }
   }
 
-  @SKCacheEvict(pKeyIdx = 2)
+  @EntityCacheEvict(pKeyIdx = 2)
   public <T extends CacheableEntity> int modByIdsVer(@NonNull Class<T> cacheType, @NonNull T t, @NonNull List<String> ids) {
     if (ids.size() == 0) {
       throw new SqlException(OM3.p(cacheType, t, ids));
@@ -111,7 +111,7 @@ public class CacheableDao {
     }
   }
 
-  @SKCacheEvict(pKeyIdx = 1, pKeyPath = SKIdEntity.FIELD__ID)
+  @EntityCacheEvict(pKeyIdx = 1, pKeyPath = SKIdEntity.FIELD__ID)
   public <T extends CacheableEntity> int modByIdVer(@NonNull Class<T> cacheType, @NonNull T t) {
     if (Strings.isNullOrEmpty(t.getId())) {
       throw new SqlException(OM3.p(cacheType, t));
@@ -122,13 +122,13 @@ public class CacheableDao {
     }
   }
 
-  @SKCacheable(rKeyPath = SKIdEntity.FIELD__ID)
+  @EntityCacheable(rKeyPath = SKIdEntity.FIELD__ID)
   public <T extends CacheableEntity> List<T> lst(@NonNull Class<T> cacheType, @NonNull T t) {
     return lstWithoutCache(cacheType, t);
   }
 
   //can't with t. if add t parameter, cache will over
-  @SKCacheable(pKeyIdx = 1, rKeyPath = SKIdEntity.FIELD__ID)
+  @EntityCacheable(pKeyIdx = 1, rKeyPath = SKIdEntity.FIELD__ID)
   public <T extends CacheableEntity> List<T> lstByIds(@NonNull Class<T> cacheType, @NonNull List<String> ids) {
     try {
       T t = cacheType.newInstance();
@@ -154,12 +154,12 @@ public class CacheableDao {
     });
   }
 
-  @SKCacheable(rKeyPath = SKIdEntity.FIELD__ID)
+  @EntityCacheable(rKeyPath = SKIdEntity.FIELD__ID)
   public <T extends CacheableEntity> T one(@NonNull Class<T> cacheType, @NonNull T t) {
     return oneWithoutCache(cacheType, t, false);
   }
 
-  @SKCacheable(rKeyPath = SKIdEntity.FIELD__ID)
+  @EntityCacheable(rKeyPath = SKIdEntity.FIELD__ID)
   public <T extends CacheableEntity> T one(@NonNull Class<T> cacheType, @NonNull T t, boolean rtnNullIfNotEqualsOne) {
     return oneWithoutCache(cacheType, t, rtnNullIfNotEqualsOne);
   }
@@ -177,12 +177,12 @@ public class CacheableDao {
     }
   }
 
-  @SKCacheable(pKeyIdx = 1, rKeyPath = SKIdEntity.FIELD__ID)
+  @EntityCacheable(pKeyIdx = 1, rKeyPath = SKIdEntity.FIELD__ID)
   public <T extends CacheableEntity> T oneById(@NonNull Class<T> cacheType, @NonNull String id) {
     return oneByIdWithoutCache(cacheType, id, false);
   }
 
-  @SKCacheable(pKeyIdx = 1, rKeyPath = SKIdEntity.FIELD__ID)
+  @EntityCacheable(pKeyIdx = 1, rKeyPath = SKIdEntity.FIELD__ID)
   public <T extends CacheableEntity> T oneById(@NonNull Class<T> cacheType, @NonNull String id, boolean rtnNullIfNotEqualsOne) {
     return oneByIdWithoutCache(cacheType, id, rtnNullIfNotEqualsOne);
   }

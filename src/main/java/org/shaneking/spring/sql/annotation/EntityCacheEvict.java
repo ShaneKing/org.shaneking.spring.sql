@@ -9,12 +9,10 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-public @interface SKCacheable {
+public @interface EntityCacheEvict {
   int clsIdx() default 0;
 
   int pKeyIdx() default -1;//begin 0, for parameter
 
   String pKeyPath() default String0.EMPTY;//a.b.c, for parameter
-
-  String rKeyPath();//a.b.c, for return
 }

@@ -9,7 +9,7 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.shaneking.jackson.databind.OM3;
 import org.shaneking.skava.lang.Object0;
 import org.shaneking.skava.lang.String0;
-import org.shaneking.spring.sql.annotation.SKCacheable;
+import org.shaneking.spring.sql.annotation.EntityCacheable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -23,28 +23,28 @@ import java.util.stream.Collectors;
 @Aspect
 @Component
 @Slf4j
-public class SKCacheableAspect {
+public class EntityCacheableAspect {
   @Autowired
-  private SKCacheAbstractWrapper skCacheAbstractWrapper;
+  private EntityCacheAbstractWrapper entityCacheAbstractWrapper;
 
-  @Pointcut("execution(@org.shaneking.spring.sql.annotation.SKCacheable * *..*.*(..))")
+  @Pointcut("execution(@org.shaneking.spring.sql.annotation.EntityCacheable * *..*.*(..))")
   private void pointcut() {
   }
 
-  @Around("pointcut() && @annotation(skCacheable)")
-  public Object around(ProceedingJoinPoint pjp, SKCacheable skCacheable) throws Throwable {
+  @Around("pointcut() && @annotation(entityCacheable)")
+  public Object around(ProceedingJoinPoint pjp, EntityCacheable entityCacheable) throws Throwable {
     Object rtn = null;
     List<Object> rtnList = null;
     List<Object> argList = null;
-    if (pjp.getArgs().length > skCacheable.clsIdx() && pjp.getArgs()[skCacheable.clsIdx()] instanceof Class) {
-      Class clazz = (Class) pjp.getArgs()[skCacheable.clsIdx()];
+    if (pjp.getArgs().length > entityCacheable.clsIdx() && pjp.getArgs()[entityCacheable.clsIdx()] instanceof Class) {
+      Class clazz = (Class) pjp.getArgs()[entityCacheable.clsIdx()];
       try {
-        if (skCacheable.pKeyIdx() > -1) {
-          Object pKeyObj = pjp.getArgs()[skCacheable.pKeyIdx()];
+        if (entityCacheable.pKeyIdx() > -1) {
+          Object pKeyObj = pjp.getArgs()[entityCacheable.pKeyIdx()];
           if (pKeyObj instanceof List) {
             //org.shaneking.spring.sql.dao.CacheableDao.lstByIds
-            List<String> pKeyList = Strings.isNullOrEmpty(skCacheable.pKeyPath()) ? (List<String>) pKeyObj : ((List<Object>) pKeyObj).parallelStream().map(o -> String.valueOf(Object0.gs(o, skCacheable.pKeyPath()))).filter(s -> !String0.isNullOrEmpty(s)).collect(Collectors.toList());
-            List<String> cachedList = skCacheAbstractWrapper.hmget(clazz.getName(), pKeyList.toArray(new String[0]));
+            List<String> pKeyList = Strings.isNullOrEmpty(entityCacheable.pKeyPath()) ? (List<String>) pKeyObj : ((List<Object>) pKeyObj).parallelStream().map(o -> String.valueOf(Object0.gs(o, entityCacheable.pKeyPath()))).filter(s -> !String0.isNullOrEmpty(s)).collect(Collectors.toList());
+            List<String> cachedList = entityCacheAbstractWrapper.hmget(clazz.getName(), pKeyList.toArray(new String[0]));
             if (cachedList.size() > 0) {
               //compile error
 //              rtnList = cachedList.parallelStream().filter(s -> !Strings.isNullOrEmpty(s)).map(s -> OM3.readValue(s, clazz, true)).filter(o -> o != null).collect(Collectors.toList());
@@ -54,22 +54,22 @@ public class SKCacheableAspect {
                   a.add(o);
                 }
               }, ArrayList::addAll);
-              Set<String> cachedKeySet = rtnList.parallelStream().map(o -> String.valueOf(Object0.gs(o, skCacheable.rKeyPath()))).filter(s -> !String0.isNullOrEmpty(s)).collect(Collectors.toSet());
+              Set<String> cachedKeySet = rtnList.parallelStream().map(o -> String.valueOf(Object0.gs(o, entityCacheable.rKeyPath()))).filter(s -> !String0.isNullOrEmpty(s)).collect(Collectors.toSet());
               argList = ((List<Object>) pKeyObj).parallelStream().filter(o -> {
-                String k = String.valueOf(Strings.isNullOrEmpty(skCacheable.pKeyPath()) ? o : Object0.gs(o, skCacheable.pKeyPath()));
+                String k = String.valueOf(Strings.isNullOrEmpty(entityCacheable.pKeyPath()) ? o : Object0.gs(o, entityCacheable.pKeyPath()));
                 return !cachedKeySet.contains(k);
               }).collect(Collectors.toList());
             }
           } else {
             //org.shaneking.spring.sql.dao.CacheableDao.oneById(java.lang.Class<T>, java.lang.String)
             //org.shaneking.spring.sql.dao.CacheableDao.oneById(java.lang.Class<T>, java.lang.String, boolean)
-            String k = String.valueOf(Strings.isNullOrEmpty(skCacheable.pKeyPath()) ? pKeyObj : Object0.gs(pKeyObj, skCacheable.pKeyPath()));
+            String k = String.valueOf(Strings.isNullOrEmpty(entityCacheable.pKeyPath()) ? pKeyObj : Object0.gs(pKeyObj, entityCacheable.pKeyPath()));
             if (String0.isNull2Empty(k)) {
-              log.warn(MessageFormat.format("{0} - {1}", pjp.getSignature().getName(), SKCacheUtils.ERR_CODE__ANNOTATION_SETTING_ERROR));
+              log.warn(MessageFormat.format("{0} - {1}", pjp.getSignature().getName(), EntityCacheUtils.ERR_CODE__ANNOTATION_SETTING_ERROR));
             } else {
-              String cached = skCacheAbstractWrapper.hget(clazz.getName(), k);
+              String cached = entityCacheAbstractWrapper.hget(clazz.getName(), k);
               if (!Strings.isNullOrEmpty(cached)) {
-                log.info(MessageFormat.format("{0} - {1} : {2}", clazz.getName(), SKCacheUtils.INFO_CODE__CACHE_HIT_ALL, cached));
+                log.info(MessageFormat.format("{0} - {1} : {2}", clazz.getName(), EntityCacheUtils.INFO_CODE__CACHE_HIT_ALL, cached));
                 rtn = OM3.readValue(cached, clazz, true);
               }
             }
@@ -80,16 +80,16 @@ public class SKCacheableAspect {
       }
       if (rtn == null) {
         if (argList != null && argList.size() == 0) {
-          log.info(MessageFormat.format("{0} - {1}({2}) : {3}", clazz.getName(), SKCacheUtils.INFO_CODE__CACHE_HIT_ALL, rtnList.size(), OM3.writeValueAsString(rtnList)));
+          log.info(MessageFormat.format("{0} - {1}({2}) : {3}", clazz.getName(), EntityCacheUtils.INFO_CODE__CACHE_HIT_ALL, rtnList.size(), OM3.writeValueAsString(rtnList)));
           rtn = rtnList;
         } else {
-          if (argList != null && argList.size() > 0 && skCacheable.pKeyIdx() > -1) {
-            log.info(MessageFormat.format("{0} - {1}({2}) : {3}", clazz.getName(), SKCacheUtils.INFO_CODE__CACHE_HIT_PART, rtnList.size(), OM3.writeValueAsString(rtnList)));
-            pjp.getArgs()[skCacheable.pKeyIdx()] = argList;
+          if (argList != null && argList.size() > 0 && entityCacheable.pKeyIdx() > -1) {
+            log.info(MessageFormat.format("{0} - {1}({2}) : {3}", clazz.getName(), EntityCacheUtils.INFO_CODE__CACHE_HIT_PART, rtnList.size(), OM3.writeValueAsString(rtnList)));
+            pjp.getArgs()[entityCacheable.pKeyIdx()] = argList;
             rtn = pjp.proceed(pjp.getArgs());
           } else {
-            if (skCacheable.pKeyIdx() > -1) {
-              log.warn(MessageFormat.format("{0} - {1}", clazz.getName(), SKCacheUtils.INFO_CODE__CACHE_HIT_MISS));
+            if (entityCacheable.pKeyIdx() > -1) {
+              log.warn(MessageFormat.format("{0} - {1}", clazz.getName(), EntityCacheUtils.INFO_CODE__CACHE_HIT_MISS));
             }
             rtn = pjp.proceed();
           }
@@ -97,8 +97,8 @@ public class SKCacheableAspect {
             if (rtn instanceof List) {
               List<Object> rstList = (List<Object>) rtn;
               if (rstList.size() > 0) {
-                skCacheAbstractWrapper.hmset(clazz.getName(), rstList.parallelStream().collect(HashMap::new, (a, o) -> {
-                  String k = String.valueOf(Object0.gs(o, skCacheable.rKeyPath()));
+                entityCacheAbstractWrapper.hmset(clazz.getName(), rstList.parallelStream().collect(HashMap::new, (a, o) -> {
+                  String k = String.valueOf(Object0.gs(o, entityCacheable.rKeyPath()));
                   if (!String0.isNullOrEmpty(k)) {
                     a.put(k, OM3.writeValueAsString(o));
                   }
@@ -111,9 +111,9 @@ public class SKCacheableAspect {
               }
               rtn = rtnList;
             } else {
-              String k = String.valueOf(Object0.gs(rtn, skCacheable.rKeyPath()));
+              String k = String.valueOf(Object0.gs(rtn, entityCacheable.rKeyPath()));
               if (!String0.isNullOrEmpty(k)) {
-                skCacheAbstractWrapper.hset(clazz.getName(), k, OM3.writeValueAsString(rtn));
+                entityCacheAbstractWrapper.hset(clazz.getName(), k, OM3.writeValueAsString(rtn));
               }
             }
           } else {
@@ -122,7 +122,7 @@ public class SKCacheableAspect {
         }
       }
     } else {
-      log.warn(MessageFormat.format("{0} - {1}", pjp.getSignature().getName(), SKCacheUtils.ERR_CODE__ANNOTATION_SETTING_ERROR));
+      log.warn(MessageFormat.format("{0} - {1}", pjp.getSignature().getName(), EntityCacheUtils.ERR_CODE__ANNOTATION_SETTING_ERROR));
       rtn = pjp.proceed();
     }
     return rtn;
