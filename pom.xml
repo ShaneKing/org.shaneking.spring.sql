@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.shaneking.spring</groupId>
     <artifactId>org.shaneking.spring</artifactId>
-    <version>0.2.4</version>
+    <version>0.2.5</version>
     <relativePath>../org.shaneking.spring</relativePath>
   </parent>
 
@@ -87,10 +87,6 @@
     </dependency>
     <dependency>
       <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-autoconfigure</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-aop</artifactId>
     </dependency>
     <dependency>
@@ -101,10 +97,6 @@
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
       <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
     </dependency>
     <dependency>
       <groupId>org.projectlombok</groupId>
@@ -127,9 +119,8 @@
       <artifactId>org.shaneking.sql</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.shaneking.spring</groupId>
-      <artifactId>org.shaneking.spring.test</artifactId>
-      <version>${project.parent.version}</version>
+      <groupId>org.shaneking</groupId>
+      <artifactId>org.shaneking.test</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>
