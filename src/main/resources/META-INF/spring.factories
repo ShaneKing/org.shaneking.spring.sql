@@ -1,2 +1,2 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-  org.shaneking.spring.sql.SqlAutoConfiguration
+org.shaneking.spring.sql.SqlAutoConfiguration
