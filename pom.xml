@@ -6,7 +6,7 @@
   <parent>
     <groupId>org.shaneking.spring</groupId>
     <artifactId>org.shaneking.spring</artifactId>
-    <version>0.3.3</version>
+    <version>0.3.4</version>
     <relativePath>../org.shaneking.spring</relativePath>
   </parent>
 
@@ -94,38 +94,9 @@
       <artifactId>spring-boot-starter-jdbc</artifactId>
     </dependency>
     <dependency>
-      <groupId>org.springframework.boot</groupId>
-      <artifactId>spring-boot-starter-test</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.projectlombok</groupId>
-      <artifactId>lombok</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.shaneking</groupId>
-      <artifactId>org.shaneking.jackson</artifactId>
-      <version>${org.shaneking_version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.shaneking</groupId>
-      <artifactId>org.shaneking.skava</artifactId>
-      <version>${org.shaneking_version}</version>
-    </dependency>
-    <dependency>
       <groupId>org.shaneking</groupId>
       <artifactId>org.shaneking.sql</artifactId>
       <version>${org.shaneking_version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.shaneking</groupId>
-      <artifactId>org.shaneking.test</artifactId>
-      <version>${org.shaneking_version}</version>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.shaneking.spring</groupId>
